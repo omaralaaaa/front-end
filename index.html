@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <input type="text" id="userInput" placeholder="Enter seating number">
+        <button id="submitBtn">Submit</button>
+        <div id="loading" class="loader"></div>
+        <div id="result" class="result">
+            <div id="percentage-circle" class="circle"><span id="percentage">0%</span></div>
+            <div id="exact-percentage">0.00%</div>
+            <table>
+                <tr><th>الإسم</th><th>الدرجة</th><th>النسبة المئوية</th></tr>
+                <tr><td id="arabicName"></td><td id="totalDegree"></td><td id="percentageValue"></td></tr>
+            </table>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#loading').hide();
+            $('#result').hide();
+
+            $('#submitBtn').click(function() {
+                let userInput = $('#userInput').val();
+                if (userInput) {
+                    $('#loading').show();
+                    $('#result').hide();
+
+                    $.ajax({
+                        url: "http:147.185.221.21:32230/process", // Update this URL
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ userInput: userInput }),
+                        success: function(response) {
+                            $('#loading').hide();
+                            if (response.error) {
+                                alert(response.error);
+                            } else {
+                                let percentage = response.percentage.toFixed(2);
+                                $('#percentage').text(percentage + '%');
+                                $('#percentage-circle').css('background', `conic-gradient(#ADD8E6 ${percentage}%, #ccc ${percentage}%)`);
+                                $('#exact-percentage').text(percentage + '%');
+                                $('#arabicName').text(response.arabic_name);
+                                $('#totalDegree').text(response.total_degree);
+                                $('#percentageValue').text(percentage + '%');
+                                $('#result').show();
+                            }
+                        },
+                        error: function() {
+                            $('#loading').hide();
+                            alert('Error processing request');
+                        }
+                    });
+                } else {
+                    alert('Please enter a seating number');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
